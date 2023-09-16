@@ -82,7 +82,7 @@ pipeline {
                     USERNAME=${DB_USER_NAME}
                     PASSWORD=${DB_PASSWORD}
                     DBNAME=${DB_NAME}
-                    #SERVER_IP=$(curl -s http://checkip.dyndns.org | sed -e 's/.*Current IP Address: //' -e 's/<.*$//')
+                    SERVER_IP=$(curl -s http://checkip.dyndns.org | sed -e 's/.*Current IP Address: //' -e 's/<.*$//')
                     SERVER_INSTANCE=${SERVER_INSTANCE}
                     echo "use wordpressdb;" >> $WORKSPACE/db.setup
                     echo "UPDATE wp_options SET option_value = 'jenkins.stack-clixx-demola-feb23.com' WHERE option_value LIKE 'http%';" >> $WORKSPACE/db.setup
