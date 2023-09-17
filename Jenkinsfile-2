@@ -85,7 +85,7 @@ pipeline {
           }
         }
 
-stage('SYNTHETIC TEST') {
+stage('Synthetic Test') {
     steps {
         script {
             sh '''
