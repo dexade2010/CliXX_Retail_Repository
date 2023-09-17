@@ -74,11 +74,11 @@ pipeline {
                SITE-URL="jenkins.stack-clixx-demola-feb23.com"
                SERVER_IP=$(curl -s http://checkip.dyndns.org | sed -e 's/.*Current IP Address: //' -e 's/<.*$//')
                SERVER_INSTANCE=${SERVER_INSTANCE}
-               #echo "use wordpressdb;" >> $WORKSPACE/db.setup
+               echo "use wordpressdb;" >> $WORKSPACE/db.setup
                #echo "UPDATE wp_options SET option_value = '$SITE-URL' WHERE option_value LIKE 'http%';">> $WORKSPACE/db.setup
-               #echo "UPDATE wp_options SET option_value = '$SITE-URL' WHERE option_value LIKE 'http%';">> $WORKSPACE/db.setup
+               echo "UPDATE wp_options SET option_value = '$SITE-URL' WHERE option_value LIKE 'http%';">> $WORKSPACE/db.setup
                #mysql -u $USERNAME --password=$PASSWORD -h $SERVER_INSTANCE  -D  $DBNAME < $WORKSPACE/db.setup
-               mysql -h $SERVER_INSTANCE -u $USERNAME -p$PASSWORD -D $DBNAME -e "UPDATE wp_options SET option_value = '$SITE-URL' WHERE option_name = 'siteurl'; UPDATE wp_options SET option_value = '$SITE-URL' WHERE option_name = 'home';"
+               mysql -h $SERVER_INSTANCE -u $USERNAME -p$PASSWORD -D $DBNAME < $WORKSPACE/db.setup
 
               '''
               }
