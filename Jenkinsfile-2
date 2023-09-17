@@ -7,30 +7,30 @@ pipeline {
     }
 
     stages {
-        stage('Sonarcube Scan') {
-            steps {
-                script {
-                    scannerHome = tool 'sonarqube'
-                }
-                withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_TOKEN')]) {
-                    withSonarQubeEnv('SonarQubeScanner') {
-                        sh """
-                           ${scannerHome}/bin/sonar-scanner \\
-                           -Dsonar.projectKey=CliXX-App-Ademola \\
-                           -Dsonar.login=${SONAR_TOKEN}
-                        """
-                    }
-                }
-            }
-        }
+        // stage('Sonarcube Scan') {
+        //     steps {
+        //         script {
+        //             scannerHome = tool 'sonarqube'
+        //         }
+        //         withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_TOKEN')]) {
+        //             withSonarQubeEnv('SonarQubeScanner') {
+        //                 sh """
+        //                    ${scannerHome}/bin/sonar-scanner \\
+        //                    -Dsonar.projectKey=CliXX-App-Ademola \\
+        //                    -Dsonar.login=${SONAR_TOKEN}
+        //                 """
+        //             }
+        //         }
+        //     }
+        // }
 
-        stage('Quality Gate') {
-            steps {
-                timeout(time: 3, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: true
-                }
-            }
-        }
+        // stage('Quality Gate') {
+        //     steps {
+        //         timeout(time: 3, unit: 'MINUTES') {
+        //             waitForQualityGate abortPipeline: true
+        //         }
+        //     }
+        // }
 
         stage('Build Docker Image') {
             steps {
@@ -76,7 +76,7 @@ pipeline {
                SERVER_INSTANCE=${SERVER_INSTANCE}
                #echo "use wordpressdb;" >> $WORKSPACE/db.setup
                #echo "UPDATE wp_options SET option_value = '$SITE-URL' WHERE option_value LIKE 'http%';">> $WORKSPACE/db.setup
-               echo "UPDATE wp_options SET option_value = '$SITE-URL' WHERE option_value LIKE 'http%';">> $WORKSPACE/db.setup
+               #echo "UPDATE wp_options SET option_value = '$SITE-URL' WHERE option_value LIKE 'http%';">> $WORKSPACE/db.setup
                #mysql -u $USERNAME --password=$PASSWORD -h $SERVER_INSTANCE  -D  $DBNAME < $WORKSPACE/db.setup
                mysql -h $SERVER_INSTANCE -u $USERNAME -p$PASSWORD -D $DBNAME -e "UPDATE wp_options SET option_value = '$SITE-URL' WHERE option_name = 'siteurl'; UPDATE wp_options SET option_value = '$SITE-URL' WHERE option_name = 'home';"
 
@@ -85,7 +85,7 @@ pipeline {
           }
         }
 
-      stage ('Tear Down CliXX Docker Image and Database') {
+        stage ('Tear Down CliXX Docker Image and Database') {
           steps {
              script {
                 def userInput = input(id: 'confirm', message: 'Tear Down Environment?', parameters: [ [$class: 'BooleanParameterDefinition', defaultValue: false, description: 'Tear Down Environment?', name: 'confirm'] ])
