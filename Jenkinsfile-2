@@ -7,30 +7,30 @@ pipeline {
     }
 
     stages {
-        // stage('Sonarcube Scan') {
-        //     steps {
-        //         script {
-        //             scannerHome = tool 'sonarqube'
-        //         }
-        //         withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_TOKEN')]) {
-        //             withSonarQubeEnv('SonarQubeScanner') {
-        //                 sh """
-        //                    ${scannerHome}/bin/sonar-scanner \\
-        //                    -Dsonar.projectKey=CliXX-App-Ademola \\
-        //                    -Dsonar.login=${SONAR_TOKEN}
-        //                 """
-        //             }
-        //         }
-        //     }
-        // }
+         stage('Sonarcube Scan') {
+             steps {
+                 script {
+                     scannerHome = tool 'sonarqube'
+                 }
+                 withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_TOKEN')]) {
+                     withSonarQubeEnv('SonarQubeScanner') {
+                         sh """
+                            ${scannerHome}/bin/sonar-scanner \\
+                            -Dsonar.projectKey=CliXX-App-Ademola \\
+                            -Dsonar.login=${SONAR_TOKEN}
+                         """
+                     }
+                 }
+             }
+         }
 
-        // stage('Quality Gate') {
-        //     steps {
-        //         timeout(time: 3, unit: 'MINUTES') {
-        //             waitForQualityGate abortPipeline: true
-        //         }
-        //     }
-        // }
+         stage('Quality Gate') {
+             steps {
+                 timeout(time: 3, unit: 'MINUTES') {
+                     waitForQualityGate abortPipeline: true
+                 }
+             }
+         }
 
         stage('Build Docker Image') {
             steps {
@@ -83,6 +83,33 @@ pipeline {
               '''
               }
           }
+        }
+
+        stage('SYNTHETIC TEST') {
+            steps {
+                script {
+                    sh '''
+                        python3 - <<END
+                        import requests
+                        import sys
+
+                        website_url = [
+                            "http://jenkins.stack-clixx-demola-feb23.com"
+                        ]
+
+                        for url in website_url:
+                            try:
+                                web_response = requests.get(url)
+                                if web_response.status_code != 200:
+                                    print(f"Error: {url} returned status code {web_response.status_code}")
+                                    sys.exit(1)
+                            except requests.RequestException as e:
+                                print(f"Error: Failed to get {url}. Exception: {e}")
+                                sys.exit(1)
+                        END
+                    '''
+                }
+            }
         }
 
         stage ('Tear Down CliXX Docker Image and Database') {
