@@ -72,10 +72,10 @@ pipeline {
                PASSWORD=${DB_PASSWORD}
                DBNAME=${DB_NAME}
                SERVER_INSTANCE=${SERVER_INSTANCE}
-               SITE_URL=${SITE_URL}
+               SITE_DOMAIN=${SITE_URL}
 
                echo "use wordpressdb;" >> $WORKSPACE/db.setup
-               echo "UPDATE wp_options SET option_value = '$SITE_URL' WHERE option_value LIKE 'http%';">> $WORKSPACE/db.setup
+               echo "UPDATE wp_options SET option_value = '$SITE_DOMAIN' WHERE option_value LIKE 'http%';">> $WORKSPACE/db.setup
                mysql -u $USERNAME --password=$PASSWORD -h $SERVER_INSTANCE  -D  $DBNAME < $WORKSPACE/db.setup
 
               '''
