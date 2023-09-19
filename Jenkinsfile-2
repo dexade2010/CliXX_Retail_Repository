@@ -132,7 +132,9 @@ END
 
         stage ('Log Into ECR and Push the Newly Created Docker Image') {
           steps {
-           withCredentials([string(credentialsId: 'ECR_USERNAME', variable: 'ECR_USERNAME'), string(credentialsId: 'ECR_REPO', variable: 'ECR_REPO')]) {
+           withCredentials([string(credentialsId: 'ECR_USERNAME', variable: 'ECR_USERNAME'), 
+                            string(credentialsId: 'ECR_REPO', variable: 'ECR_REPO')]) 
+        {
            sh '''
             aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${ECR_REPO}
             docker tag clixx-image:${VERSION} ${ECR_REPO}:clixx-image-${VERSION}
@@ -146,18 +148,23 @@ END
 
     stage('Replicate Image to Dev ECR') {
     steps {
-        sh '''
-            aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 979232140372.dkr.ecr.us-east-1.amazonaws.com/clixx-repository
-            docker tag clixx-image:${VERSION} 979232140372.dkr.ecr.us-east-1.amazonaws.com/clixx-repository:clixx-image-${VERSION}
-            docker tag clixx-image:${VERSION} 979232140372.dkr.ecr.us-east-1.amazonaws.com/clixx-repository:latest
-            docker push 979232140372.dkr.ecr.us-east-1.amazonaws.com/clixx-repository:clixx-image-${VERSION}
-            docker push 979232140372.dkr.ecr.us-east-1.amazonaws.com/clixx-repository:latest
-        '''
+        withCredentials([string(credentialsId: 'DEV_USERNAME', variable: 'DEV_USERNAME'),
+                         string(credentialsId: 'DEV_REPO', variable: 'DEV_REPO')])
+        {
+         sh '''
+            aws ecr get-login-password --region us-east-1 | docker login --username ${DEV_USERNAME} --password-stdin ${DEV_REPO}
+            docker tag clixx-image:${VERSION} ${DEV_REPO}:clixx-image-${VERSION}
+            docker tag clixx-image:${VERSION} ${DEV_REPO}:latest
+            docker push ${DEV_REPO}:clixx-image-${VERSION}
+            docker push ${DEV_REPO}:latest
+         '''
+        }
       }
-   }
- }
+    }
 
+ }
 }
+
 
 def getSonarPath() {
     def SonarHome = tool name: 'sonarqube', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
