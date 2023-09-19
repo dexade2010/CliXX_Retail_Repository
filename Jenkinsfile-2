@@ -135,13 +135,19 @@ END
              script {
                 def userInput = input(id: 'confirm', message: 'Push Image To ECR?', parameters: [ [$class: 'BooleanParameterDefinition', defaultValue: false, description: 'Push to ECR?', name: 'confirm'] ])
              }
-              withCredentials([string(credentialsId: 'ECR_USERNAME', variable: 'ECR_USERNAME'), string(credentialsId: 'ECR_REPO', variable: 'ECR_REPO'), ]){
+              withCredentials([string(credentialsId: 'ECR_USERNAME', variable: 'ECR_USERNAME'), string(credentialsId: 'ECR_REPO', variable: 'ECR_REPO'), string(credentialsId: 'ECR_REPO_DEV', variable: 'ECR_REPO_DEV') ]){
               sh '''
                 aws ecr get-login-password --region us-east-1 | docker login --username ${ECR_USERNAME} --password-stdin ${ECR_REPO}
-                docker tag clixx-image:$VERSION ${ECR_REPO}:clixx-image-$VERSION
-                docker tag clixx-image:$VERSION ${ECR_REPO}:latest
-                docker push ${ECR_REPO}:clixx-image-$VERSION
+                docker tag clixx-image:${VERSION} ${ECR_REPO}:clixx-image-${VERSION}
+                docker tag clixx-image:${VERSION} ${ECR_REPO}:latest
+                docker push ${ECR_REPO}:clixx-image-${VERSION}
                 docker push ${ECR_REPO}:latest
+              '''
+
+              sh '''
+                aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${ECR_REPO_DEV}
+                docker tag clixx-image:${VERSION} ${ECR_REPO_DEV}:clixx-image-${VERSION}
+                docker push ${ECR_REPO_DEV}:clixx-image-${VERSION}
               '''
           }
           }
