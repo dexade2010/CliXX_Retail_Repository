@@ -7,30 +7,30 @@ pipeline {
     }
 
     stages {
-        // stage('Sonarcube Scan') {
-        //      steps {
-        //          script {
-        //              scannerHome = tool 'sonarqube'
-        //          }
-        //          withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_TOKEN')]) {
-        //              withSonarQubeEnv('SonarQubeScanner') {
-        //                  sh """
-        //                     ${scannerHome}/bin/sonar-scanner \\
-        //                     -Dsonar.projectKey=CliXX-App-Ademola \\
-        //                     -Dsonar.login=${SONAR_TOKEN}
-        //                  """
-        //              }
-        //          }
-        //      }
-        //  }
+        stage('Sonarcube Scan') {
+             steps {
+                 script {
+                     scannerHome = tool 'sonarqube'
+                 }
+                 withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_TOKEN')]) {
+                     withSonarQubeEnv('SonarQubeScanner') {
+                         sh """
+                            ${scannerHome}/bin/sonar-scanner \\
+                            -Dsonar.projectKey=CliXX-App-Ademola \\
+                            -Dsonar.login=${SONAR_TOKEN}
+                         """
+                     }
+                 }
+             }
+         }
 
-        // stage('Quality Gate') {
-        //      steps {
-        //          timeout(time: 3, unit: 'MINUTES') {
-        //              waitForQualityGate abortPipeline: true
-        //          }
-        //      }
-        //  }
+        stage('Quality Gate') {
+             steps {
+                 timeout(time: 3, unit: 'MINUTES') {
+                     waitForQualityGate abortPipeline: true
+                 }
+             }
+         }
 
         stage('Build Docker Image') {
             steps {
@@ -136,7 +136,7 @@ END
                             string(credentialsId: 'ECR_REPO', variable: 'ECR_REPO')]) 
         {
            sh '''
-            aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${ECR_REPO}
+            aws ecr get-login-password --region us-east-1 | docker login --username ${ECR_USERNAME} --password-stdin ${ECR_REPO}
             docker tag clixx-image:${VERSION} ${ECR_REPO}:clixx-image-${VERSION}
             docker tag clixx-image:${VERSION} ${ECR_REPO}:latest
             docker push ${ECR_REPO}:clixx-image-${VERSION}
