@@ -130,40 +130,35 @@ END
           }
         }
 
-        stage ('Log Into ECR and push the newly created Docker Image') {
+        stage ('Log Into ECR and Push the Newly Created Docker Image') {
           steps {
-             script {
-                def userInput = input(id: 'confirm', message: 'Push Image To ECR?', parameters: [ [$class: 'BooleanParameterDefinition', defaultValue: false, description: 'Push to ECR?', name: 'confirm'] ])
-             }
-              withCredentials([string(credentialsId: 'ECR_USERNAME', variable: 'ECR_USERNAME'), string(credentialsId: 'ECR_REPO', variable: 'ECR_REPO'), string(credentialsId: 'ECR_REPO_DEV', variable: 'ECR_REPO_DEV')]){
-              sh '''
-                aws ecr get-login-password --region us-east-1 | docker login --username ${ECR_USERNAME} --password-stdin ${ECR_REPO}
-                docker tag clixx-image:$VERSION ${ECR_REPO}:clixx-image-$VERSION
-                docker tag clixx-image:$VERSION ${ECR_REPO}:latest
-                docker push ${ECR_REPO}:clixx-image-$VERSION
-                docker push ${ECR_REPO}:latest
-              '''
-          }
-          }
+           withCredentials([string(credentialsId: 'ECR_USERNAME', variable: 'ECR_USERNAME'), string(credentialsId: 'ECR_REPO', variable: 'ECR_REPO')]) {
+           sh '''
+            aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${ECR_REPO}
+            docker tag clixx-image:${VERSION} ${ECR_REPO}:clixx-image-${VERSION}
+            docker tag clixx-image:${VERSION} ${ECR_REPO}:latest
+            docker push ${ECR_REPO}:clixx-image-${VERSION}
+            docker push ${ECR_REPO}:latest
+          '''
         }
-
-        stage('Replicate Image to Dev ECR') {
-          steps {
-           script {
-                def userInput = input(id: 'confirm', message: 'Push Image To Dev ECR?', parameters: [ [$class: 'BooleanParameterDefinition', defaultValue: false, description: 'Push to Dev ECR?', name: 'confirm'] ])
-             }
-              withCredentials([string(credentialsId: 'ECR_USERNAME', variable: 'ECR_USERNAME'), string(credentialsId: 'ECR_REPO_DEV', variable: 'ECR_REPO_DEV')]) {
-              sh '''
-                aws ecr get-login-password --region us-east-1 | docker login --username 'ECR_USERNAME' --password-stdin ${ECR_REPO_DEV}
-                docker tag clixx-image:${VERSION} ${ECR_REPO_DEV}:clixx-image-$VERSION
-                docker tag clixx-image:$VERSION ${ECR_REPO_DEV}:latest
-                docker push ${ECR_REPO_DEV}:clixx-image-$VERSION
-                docker push ${ECR_REPO_DEV}:latest
-              '''
-            }
-          }
-        }
+      }
     }
+
+       stage('Replicate Image to Dev ECR') {
+        steps {
+         withCredentials([string(credentialsId: 'ECR_USERNAME', variable: 'ECR_USERNAME'), string(credentialsId: 'ECR_REPO_DEV', variable: 'ECR_REPO_DEV')]) {
+         sh '''
+            aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${ECR_REPO_DEV}
+            docker tag clixx-image:${VERSION} ${ECR_REPO_DEV}:clixx-image-${VERSION}
+            docker tag clixx-image:${VERSION} ${ECR_REPO_DEV}:latest
+            docker push ${ECR_REPO_DEV}:clixx-image-${VERSION}
+            docker push ${ECR_REPO_DEV}:latest
+        '''
+       }
+     }
+   }
+
+  }
 }
 
 def getSonarPath() {
