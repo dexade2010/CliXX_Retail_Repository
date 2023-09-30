@@ -33,7 +33,7 @@
     connection: local
     become: ec2-user
     vars:
-      instance_id: wordpressdbclixxjenkins
+      instance_id: wordpressdbclixx
       db_snapshot: wordpressdbclixxsnap
       security_group: sg-0f3001fb46013d3ac
       ansible_python_interpreter: /usr/bin/python3  # Specify Python 3 interpreter
