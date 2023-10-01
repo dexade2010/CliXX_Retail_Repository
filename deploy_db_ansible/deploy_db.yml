@@ -35,7 +35,7 @@
     vars:
       instance_id: wordpressdbclixx
       db_snapshot: wordpressdbclixxsnap
-      security_group: sg-02263948636b94db3
+      security_group: sg-0f3001fb46013d3ac
       ansible_python_interpreter: /usr/bin/python3  # Specify Python 3 interpreter
     tasks:
        - name: Restore DB from snapshot
