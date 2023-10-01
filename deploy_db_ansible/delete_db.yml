@@ -20,7 +20,7 @@
     connection: local
     vars:
       ansible_python_interpreter: /usr/bin/python3  # Add this line to use Python 3
-      instance_id: wordpressdbclixxjenkins
+      instance_id: wordpressdbclixx
     tasks:
       - name: remove a db instance without taking a final snapshot
         rds_instance:
