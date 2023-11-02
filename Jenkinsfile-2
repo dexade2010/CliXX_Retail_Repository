@@ -7,30 +7,30 @@ pipeline {
     }
 
     stages {
-        // stage('Sonarcube Scan') {
-        //      steps {
-        //          script {
-        //              scannerHome = tool 'sonarqube'
-        //          }
-        //          withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_TOKEN')]) {
-        //              withSonarQubeEnv('SonarQubeScanner') {
-        //                  sh """
-        //                     ${scannerHome}/bin/sonar-scanner \\
-        //                     -Dsonar.projectKey=CliXX-App-Ademola \\
-        //                     -Dsonar.login=${SONAR_TOKEN}
-        //                  """
-        //              }
-        //          }
-        //      }
-        //  }
+        stage('Sonarcube Scan') {
+             steps {
+                 script {
+                     scannerHome = tool 'sonarqube'
+                 }
+                 withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_TOKEN')]) {
+                     withSonarQubeEnv('SonarQubeScanner') {
+                         sh """
+                            ${scannerHome}/bin/sonar-scanner \\
+                            -Dsonar.projectKey=CliXX-App-Ademola \\
+                            -Dsonar.login=${SONAR_TOKEN}
+                         """
+                     }
+                 }
+             }
+         }
 
-        // stage('Quality Gate') {
-        //      steps {
-        //          timeout(time: 3, unit: 'MINUTES') {
-        //              waitForQualityGate abortPipeline: true
-        //          }
-        //      }
-        //  }
+        stage('Quality Gate') {
+             steps {
+                 timeout(time: 3, unit: 'MINUTES') {
+                     waitForQualityGate abortPipeline: true
+                 }
+             }
+         }
 
         stage('Build Docker Image') {
             steps {
@@ -51,64 +51,64 @@ pipeline {
             }
         }
 
-//         stage('Restore CliXX Database') {
-//             steps {
-//                 sh '''
-//                 python3 -m venv python3-virtualenv
-//                 source python3-virtualenv/bin/activate
-//                 python3 --version
-//                 pip3 install boto3 botocore boto
-//                 ansible-playbook $WORKSPACE/deploy_db_ansible/deploy_db.yml
-//                 deactivate
-//                 '''
-//             }
-//         }
+        stage('Restore CliXX Database') {
+            steps {
+                sh '''
+                python3 -m venv python3-virtualenv
+                source python3-virtualenv/bin/activate
+                python3 --version
+                pip3 install boto3 botocore boto
+                ansible-playbook $WORKSPACE/deploy_db_ansible/deploy_db.yml
+                deactivate
+                '''
+            }
+        }
 
-//         stage ('Configure DB Instance') {
-//           steps {
-//               withCredentials([string(credentialsId: 'DB_USER_NAME', variable: 'DB_USER_NAME'), string(credentialsId: 'DB_PASSWORD', variable: 'DB_PASSWORD'), string(credentialsId: 'DB_NAME', variable: 'DB_NAME'), string(credentialsId: 'SERVER_INSTANCE', variable: 'SERVER_INSTANCE'), string(credentialsId: 'SITE_URL', variable: 'SITE_URL')]){
-//               sh '''
-//                USERNAME=${DB_USER_NAME}
-//                PASSWORD=${DB_PASSWORD}
-//                DBNAME=${DB_NAME}
-//                SERVER_INSTANCE=${SERVER_INSTANCE}
-//                SITE_DOMAIN=${SITE_URL}
+        stage ('Configure DB Instance') {
+          steps {
+              withCredentials([string(credentialsId: 'DB_USER_NAME', variable: 'DB_USER_NAME'), string(credentialsId: 'DB_PASSWORD', variable: 'DB_PASSWORD'), string(credentialsId: 'DB_NAME', variable: 'DB_NAME'), string(credentialsId: 'SERVER_INSTANCE', variable: 'SERVER_INSTANCE'), string(credentialsId: 'SITE_URL', variable: 'SITE_URL')]){
+              sh '''
+               USERNAME=${DB_USER_NAME}
+               PASSWORD=${DB_PASSWORD}
+               DBNAME=${DB_NAME}
+               SERVER_INSTANCE=${SERVER_INSTANCE}
+               SITE_DOMAIN=${SITE_URL}
 
-//                echo "use wordpressdb;" >> $WORKSPACE/db.setup
-//                echo "UPDATE wp_options SET option_value = '$SITE_DOMAIN' WHERE option_value LIKE 'http%';">> $WORKSPACE/db.setup
-//                mysql -u $USERNAME --password=$PASSWORD -h $SERVER_INSTANCE  -D  $DBNAME < $WORKSPACE/db.setup
+               echo "use wordpressdb;" >> $WORKSPACE/db.setup
+               echo "UPDATE wp_options SET option_value = '$SITE_DOMAIN' WHERE option_value LIKE 'http%';">> $WORKSPACE/db.setup
+               mysql -u $USERNAME --password=$PASSWORD -h $SERVER_INSTANCE  -D  $DBNAME < $WORKSPACE/db.setup
 
-//               '''
-//               }
-//           }
-//         }
+              '''
+              }
+          }
+        }
 
-// stage('Synthetic Test') {
-//     steps {
-//         script {
-//             sh '''
-// python3 - <<END
-// import requests
-// import sys
+stage('Synthetic Test') {
+    steps {
+        script {
+            sh '''
+python3 - <<END
+import requests
+import sys
 
-// website_url = [
-//     "http://jenkins.stack-clixx-demola-feb23.com"
-// ]
+website_url = [
+    "http://jenkins.stack-clixx-demola-feb23.com"
+]
 
-// for url in website_url:
-//     try:
-//         web_response = requests.get(url)
-//         if web_response.status_code != 200:
-//             print(f"Error: {url} returned status code {web_response.status_code}")
-//             sys.exit(1)
-//     except requests.RequestException as e:
-//         print(f"Error: Failed to get {url}. Exception: {e}")
-//         sys.exit(1)
-// END
-//             '''
-//         }
-//     }
-// }
+for url in website_url:
+    try:
+        web_response = requests.get(url)
+        if web_response.status_code != 200:
+            print(f"Error: {url} returned status code {web_response.status_code}")
+            sys.exit(1)
+    except requests.RequestException as e:
+        print(f"Error: Failed to get {url}. Exception: {e}")
+        sys.exit(1)
+END
+            '''
+        }
+    }
+}
 
 
         stage ('Tear Down CliXX Docker Image and Database') {
